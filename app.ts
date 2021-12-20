@@ -8,6 +8,8 @@
  * Node Module Imports (Using CommonJS syntax)
  */
 
+// @ts-check
+
 // Express routing app
 const express = require('express');
 const app = express();
@@ -202,6 +204,7 @@ app.post('/api/search', async (req: any, res: any) => {
     });
   }
 
+  // TODO: Account for title and author search
   else if (req.body.title) {
   	console.log(req.body.title);
   }
