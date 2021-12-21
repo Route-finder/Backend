@@ -6,3 +6,5 @@ npm-debug.log
 package.json
 package-lock.json
 *.swp
+app.js
+src/path.js

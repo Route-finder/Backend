@@ -8,6 +8,8 @@
  * Node Module Imports (Using CommonJS syntax)
  */
 
+// @ts-check
+
 // Express routing app
 const express = require('express');
 const app = express();
@@ -67,11 +69,10 @@ const pool = new Pool({
  */
 
 // Homepage
-app.get('/', (req, res) => res.render('pages/index'));
-app.get('/cool', (req, res) => res.send(cool()));
+app.get('/', (req: any, res: any) => res.render('pages/index'));
 
 // DB Information - From "Hello World" presentation
-app.get('/db', async (req, res) => {
+app.get('/db', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT * FROM test_table');
@@ -79,14 +80,14 @@ app.get('/db', async (req, res) => {
     console.log(results);
     res.render('pages/db', results );
     client.release();
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.send("Error " + err);
   }
 });
 
 // Route Information
-app.get('/route', async (req, res) => {
+app.get('/route', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
                                                   // Use table name
@@ -95,18 +96,18 @@ app.get('/route', async (req, res) => {
     console.log(results);
     res.render('pages/route', results );
     client.release();
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.send("Error " + err);
   }
 });
 
 // Adding Books
-app.get('/add', (req, res) => {
+app.get('/add', (req: any, res: any) => {
   let result = null;
   res.render('pages/add', {result: result});
 });
-app.post('/add', async (req, res) => {
+app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
   let book = {
     isbn: req.body.isbn,
@@ -116,7 +117,7 @@ app.post('/add', async (req, res) => {
   };
 
   // Treat the callback as a ".then()" sort of function
-  classify.classify(req.body.isbn, "isbn", async function (data) {
+  classify.classify(req.body.isbn, "isbn", async function (data: any) {
     book.title = data.title;
     book.author = data.author;
     book.call_no = data.congress;
@@ -130,7 +131,7 @@ app.post('/add', async (req, res) => {
     try {
       const res = await client.query(text, values)
       console.log(res.rows[0])
-    } catch (err) {
+    } catch (err: any) {
       console.log(err.stack)
     }
   
@@ -145,31 +146,31 @@ app.post('/add', async (req, res) => {
  */
 
 // Generic "hello world!" api route
-app.get('/api', (req, res) => {
+app.get('/api', (req: any, res: any) => {
   res.json({ "message": "Hello from the backend!" });
 });
 
 // Provides list of books from database, no parameters needed
-app.get('/api/books', async (req, res) => {
+app.get('/api/books', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT * FROM booklist'); // ORDER BY call_no
     const results = { 'results': (result) ? result.rows : null};
 
     // Sort the results according to LCC call number
-    results.results.sort((a, b) => {
+    results.results.sort((a: any, b: any) => {
       return lc.lt(a.call_no, b.call_no);
     });
 
     res.json(results);
     client.release();
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.json({"Error": err});
   }
 });
 
-app.post('/api/search', async (req, res) => {
+app.post('/api/search', async (req: any, res: any) => {
   console.log("Request Body: ", req.body);
   
   if (req.body.isbn) {
@@ -181,7 +182,7 @@ app.post('/api/search', async (req, res) => {
     };
   
     // Treat the callback as a ".then()" sort of function
-    classify.classify(req.body.isbn, "isbn", async function (data) {
+    classify.classify(req.body.isbn, "isbn", async function (data: any) {
       book.title = data.title;
       book.author = data.author;
       book.call_no = data.congress;
@@ -195,7 +196,7 @@ app.post('/api/search', async (req, res) => {
       try {
         const res = await client.query(text, values)
         console.log(res.rows[0])
-      } catch (err) {
+      } catch (err: any) {
         console.log(err.stack)
       }
 
@@ -203,6 +204,7 @@ app.post('/api/search', async (req, res) => {
     });
   }
 
+  // TODO: Account for title and author search
   else if (req.body.title) {
   	console.log(req.body.title);
   }
@@ -224,17 +226,4 @@ app.listen(PORT, () => {
 });
 
 // Define a 404 Route
-app.use((req, res) => res.status(404).render('pages/404'));
-
-/**
- * Auxilary Functions
- * - skip_shelves
- */
-
-// path: Array of (upper bound (LOC code), distance)
-// initial: LOC code
-function skip_shelves(path, initial) {
-    for (let i in skip_shelves) {
-	let [upper, dist] = path[i];
-    }
-}
+app.use((req: any, res: any) => res.status(404).render('pages/404'));
