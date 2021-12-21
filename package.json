@@ -7,7 +7,8 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/tsc && node app.js",
+    "start": "node app.js",
+    "postinstall": "tsc"
     "test": "echo \"No Test Specified\" && exit 1"
   },
   "dependencies": {
