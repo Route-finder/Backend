@@ -218,6 +218,26 @@ app.post('/api/search', async (req: any, res: any) => {
   }
 });
 
+app.post('/api/remove', async (req: any, res: any) => {
+  if (req.body.isbn) {
+    // Submit a query to remove the book
+    console.log(`Remove book with ISBN ${req.body.isbn} from the list`);
+
+    // Add book info (from OCLC response) to Database
+    const client = await pool.connect();
+    const text = "DELETE FROM booklist WHERE isbn=VALUES($1)"
+    const values = [req.body.isbn];
+  
+    try {
+      const res = await client.query(text, values)
+    } catch (err: any) {
+      console.log(err.stack)
+    }
+
+    res.json({"Status": "Success"});
+  }
+});
+
 /**
  * Listen on PORT for requests, start the server
  */ 
