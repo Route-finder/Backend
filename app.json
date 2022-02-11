@@ -1,8 +1,8 @@
 {
   "name": "Route Finder",
   "description": "A Library Book Route-finding Application",
-  "repository": "https://github.com/isaac-list/store_project/",
+  "repository": "https://github.com/Route-finder/Backend/",
   "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/main/public/node.svg",
-  "keywords": ["node", "express", "heroku"],
+  "keywords": ["node", "express", "library", "books", "pathfinding"],
   "image": "heroku/nodejs"
 }
