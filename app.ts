@@ -68,7 +68,7 @@ const pool = new Pool({
  */
 async function build_db() {
   const client = await pool.connect();
-  const text = "CREATE TABLE booklist IF NOT EXISTS (VALUES($1, $2, $3, $4))"
+  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4))"
   const values = [
     "isbn VARCHAR(16) PRIMARY KEY",
     "author VARCHAR(50)",
