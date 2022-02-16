@@ -60,9 +60,31 @@ const pool = new Pool({
 });
 
 /**
+ * @function
+ * build_db - (re)build tables
+ * 
  * @description
  * Rebuild PostgreSQL tables on restart
  */
+async function build_db() {
+  const client = await pool.connect();
+  const text = "CREATE TABLE booklist IF NOT EXISTS (VALUES($1, $2, $3, $4))"
+  const values = [
+    "isbn VARCHAR(16) PRIMARY KEY",
+    "author VARCHAR(50)",
+    "title VARCHAR(150)",
+    "call_no VARCHAR(40)"
+  ];
+  
+  try {
+    const res = await client.query(text, values)
+    console.log(res.rows[0])
+  } catch (err: any) {
+    console.log(err.stack)
+  }
+}
+
+build_db();
 
 /**
  * @description
