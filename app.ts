@@ -60,31 +60,45 @@ const pool = new Pool({
 });
 
 /**
+ * @function
+ * build_db - (re)build tables
+ * 
+ * @description
+ * Rebuild PostgreSQL tables on restart
+ */
+async function build_db() {
+  const client = await pool.connect();
+  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4))"
+  const values = [
+    "isbn VARCHAR(16) PRIMARY KEY",
+    "author VARCHAR(50)",
+    "title VARCHAR(150)",
+    "call_no VARCHAR(40)"
+  ];
+  
+  try {
+    const res = await client.query(text, values)
+    console.log(res.rows[0])
+  } catch (err: any) {
+    console.log(err.stack)
+  }
+}
+
+build_db();
+
+/**
+ * @description
  * Define the application routes
  *  - Homepage (/)
- *  - Database (/db)
  *  - Route and Book List (/route)
  *  - Adding Books (/add) GET and POST
  *  - React Client API (/api)
  */
 
-// Homepage
+/**
+ * Homepage GET route
+ */
 app.get('/', (req: any, res: any) => res.render('pages/index'));
-
-// DB Information - From "Hello World" presentation
-app.get('/db', async (req: any, res: any) => {
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT * FROM test_table');
-    const results = { 'results': (result) ? result.rows : null};
-    console.log(results);
-    res.render('pages/db', results );
-    client.release();
-  } catch (err: any) {
-    console.error(err);
-    res.send("Error " + err);
-  }
-});
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
@@ -102,11 +116,17 @@ app.get('/route', async (req: any, res: any) => {
   }
 });
 
-// Adding Books
+/**
+ * Add page GET route
+ */
 app.get('/add', (req: any, res: any) => {
   let result = null;
   res.render('pages/add', {result: result});
 });
+
+/**
+ * Add page POST route
+ */
 app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
   let book = {
@@ -142,15 +162,22 @@ app.post('/add', async (req: any, res: any) => {
 });
 
 /**
+ * @description
  * API for React client frontend
  */
 
-// Generic "hello world!" api route
+/**
+ * @description
+ * Generic "hello world!" api route
+ */
 app.get('/api', (req: any, res: any) => {
   res.json({ "message": "Hello from the backend!" });
 });
 
-// Provides list of books from database, no parameters needed
+/**
+ * @description
+ * Provides list of books from database
+ */
 app.get('/api/books', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
@@ -170,6 +197,14 @@ app.get('/api/books', async (req: any, res: any) => {
   }
 });
 
+/**
+ * @description
+ * Provides a single item result from the OCLC API via the classify2_api
+ * Node module
+ * 
+ * @param
+ * {json} req - provides the request body, search uses the isbn attribute 
+ */
 app.post('/api/search', async (req: any, res: any) => {
   console.log("Request Body: ", req.body);
   
@@ -218,6 +253,13 @@ app.post('/api/search', async (req: any, res: any) => {
   }
 });
 
+/**
+ * @description
+ * Provides a route via which to remove an item from the database
+ * 
+ * @param
+ * {json} req - provides the request body, requires req.body.isbn be populated
+ */
 app.post('/api/remove', async (req: any, res: any) => {
   if (req.body.isbn) {
     // Submit a query to remove the book
@@ -239,11 +281,17 @@ app.post('/api/remove', async (req: any, res: any) => {
 });
 
 /**
+ * @function
+ * 
+ * @description
  * Listen on PORT for requests, start the server
  */ 
 app.listen(PORT, () => {
   console.log(`app listening on port ${PORT}`);
 });
 
-// Define a 404 Route
+/**
+ * @description
+ * Define a 404 Route
+ */
 app.use((req: any, res: any) => res.status(404).render('pages/404'));
