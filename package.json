@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node app.js",
     "postinstall": "tsc",
-    "test": "echo \"No Test Specified\" && exit 1"
+    "test": "echo \"No Test Specified\" && exit 0"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
