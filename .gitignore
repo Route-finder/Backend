@@ -4,7 +4,6 @@ npm-debug.log
 .env
 .DS_Store
 package.json
-package-lock.json
 *.swp
 app.js
 src/path.js
