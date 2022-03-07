@@ -138,7 +138,7 @@ app.post('/add', async (req: any, res: any) => {
   };
 
   // Treat the callback as a ".then()" sort of function
-  classify.classify(req.body.isbn, "isbn", async function (data: any) {
+  classify.classify("isbn", [req.body.isbn], async function (data: any) {
     book.title = data.title;
     book.author = data.author;
     book.call_no = data.congress;
@@ -217,8 +217,8 @@ app.post('/api/search', async (req: any, res: any) => {
       call_no: ""
     };
   
-    // Treat the callback as a ".then()" sort of function
-    classify.classify(req.body.isbn, "isbn", async function (data: any) {
+    // Call classify method with request_type, identifier[], and callback()
+    classify.classify("isbn", [req.body.isbn], async function (data: any) {
       book.title = data.title;
       book.author = data.author;
       book.call_no = data.congress;
