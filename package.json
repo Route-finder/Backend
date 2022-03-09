@@ -32,6 +32,8 @@
     "@typescript-eslint/parser": "^5.7.0",
     "eslint": "^8.5.0",
     "got": "^11.8.2",
+    "mocha": "^9.2.1",
+    "supertest": "^6.2.2",
     "tape": "^4.7.0",
     "typescript": "^4.5.4"
   },
