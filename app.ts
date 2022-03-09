@@ -186,9 +186,9 @@ app.get('/api/books', async (req: any, res: any) => {
     const results = { 'results': (result) ? result.rows : null};
 
     // Sort the results according to LCC call number
-    results.results.sort((a: any, b: any) => {
-      return lc.lt(a.call_no, b.call_no);
-    });
+    // results.results.sort((a: any, b: any) => {
+    //   return lc.lt(a.call_no, b.call_no);
+    // });
 
     res.json(results);
     client.release();
