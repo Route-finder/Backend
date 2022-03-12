@@ -10,6 +10,16 @@
 
 // @ts-check
 
+/**
+ * Define types for TypeScript
+ */
+type book = {
+  isbn: string,
+  title: string,
+  author: string,
+  call_no: string
+}
+
 // Express routing app
 const express = require('express');
 const app = express();
@@ -23,7 +33,9 @@ const multer = require('multer');
 const upload = multer();
 const { body, validationResult } = require('express-validator');
 
-// const cool = require('cool-ascii-faces');
+// ISBN Validation
+const ISBN = require('isbn').ISBN;
+
 // Routing
 const path = require('path');
 
@@ -130,36 +142,41 @@ app.get('/add', (req: any, res: any) => {
  */
 app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
-  let book = {
-    isbn: req.body.isbn,
-    title: "",
-    author: "",
-    call_no: ""
-  };
+  if (req.body.isbn) {
+    let isbnSearch = ISBN.parse(req.body.isbn);
+    
+    if (isbnSearch.isIsbn10() || isbnSearch.isIsbn13()) {
+      let book = {
+        isbn: req.body.isbn,
+        title: "",
+        author: "",
+        call_no: ""
+      };
+    
+      // Call classify method with request_type, identifier[], and callback()
+      classify.classify("isbn", [req.body.isbn], async function (data: any) {
+        if (data.title) {
+          book.title = data.title;
+          book.author = data.author;
+          book.call_no = data.congress;
 
-  // Treat the callback as a ".then()" sort of function
-  classify.classify("isbn", [req.body.isbn], async function (data: any) {
-    book.title = data.title;
-    book.author = data.author;
-    book.call_no = data.congress;
-    console.log("book:", book);
+          addToDatabase(book);
+        }
 
-    // Add book info (from OCLC response) to Database
-    const client = await pool.connect();
-    const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
-    const values = [book.isbn, book.author, book.title, book.call_no];
-  
-    try {
-      const res = await client.query(text, values)
-      console.log(res.rows[0])
-    } catch (err: any) {
-      console.log(err.stack)
+        else {
+          console.log("status: failure", "error:", data);
+        }
+      });
+
+      // Placeholder: Print a message
+      const result = book;
+      res.render('pages/add', {result: result});
     }
-  
-    // Placeholder: Print a message
-    const result = book;
-    res.render('pages/add', {result: result});
-  });
+
+    else {
+      res.render('pages/add', {result: "failure: Invalid ISBN"});
+    }
+  }
 });
 
 /**
@@ -186,7 +203,7 @@ app.get('/api/books', async (req: any, res: any) => {
     const results = { 'results': (result) ? result.rows : null};
 
     // Sort the results according to LCC call number
-    // results.results.sort((a: any, b: any) => {
+    // results = results.sort((a: any, b: any) => {
     //   return lc.lt(a.call_no, b.call_no);
     // });
 
@@ -210,49 +227,65 @@ app.post('/api/search', async (req: any, res: any) => {
   console.log("Request Body: ", req.body);
   
   if (req.body.isbn) {
-    let book = {
-      isbn: req.body.isbn,
-      title: "",
-      author: "",
-      call_no: ""
-    };
-  
-    // Call classify method with request_type, identifier[], and callback()
-    classify.classify("isbn", [req.body.isbn], async function (data: any) {
-      book.title = data.title;
-      book.author = data.author;
-      book.call_no = data.congress;
-      console.log("book:", book);
-  
-      // Add book info (from OCLC response) to Database
-      const client = await pool.connect();
-      const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
-      const values = [book.isbn, book.author, book.title, book.call_no];
+    let isbnSearch = ISBN.parse(req.body.isbn);
     
-      try {
-        const res = await client.query(text, values)
-        console.log(res.rows[0])
-      } catch (err: any) {
-        console.log(err.stack)
-      }
+    if (isbnSearch.isIsbn10() || isbnSearch.isIsbn13()) {
+      let book = {
+        isbn: req.body.isbn,
+        title: "",
+        author: "",
+        call_no: ""
+      };
+    
+      // Call classify method with request_type, identifier[], and callback()
+      classify.classify("isbn", [req.body.isbn], async function (data: any) {
+        if (data.title) {
+          book.title = data.title;
+          book.author = data.author;
+          book.call_no = data.congress;
 
-      res.json({"Status": "Success", "book": book});
-    });
+          addToDatabase(book);
+      
+          res.json({"status": "success", "book": book});
+        }
+        else {
+          res.json({"status": "failure", "error": data})
+        }
+      });
+    }
+
+    else {
+      res.json({"status": "failure", "error": "Invalid ISBN"});
+    }
   }
 
   // TODO: Account for title and author search
-  else if (req.body.title) {
-  	console.log(req.body.title);
+  else if (req.body.title || req.body.author) {
+    let values = [req.body.title, req.body.author];
+
+    console.log(values);
   }
-  else if (req.body.author) {
-  	console.log(req.body.author)
-  }
-  
+
+  // Account for no information entered
   else {
-  	console.log("Nothing entered");
-    res.json("No Values Provided");
+    console.log("Nothing entered");
+    res.json({"status": "failure", "error": "No Values Provided"});
   }
 });
+
+async function addToDatabase(newItem: book) {
+  // Add book info (from OCLC response) to Database
+  const client = await pool.connect();
+  const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
+  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no];
+
+  try {
+    const res = await client.query(text, values)
+    console.log(res.rows[0])
+  } catch (err: any) {
+    console.log(err.stack)
+  }
+}
 
 /**
  * @description
