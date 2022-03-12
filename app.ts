@@ -175,7 +175,7 @@ app.post('/add', async (req: any, res: any) => {
       console.log(`Item: ${item.isbn}`);
     
       // Call classify method with request_type, identifier[], and callback()
-      classify.classify("isbn", [req.body.isbn], async function (data: any) {
+      classify.classify("isbn", [item.isbn], async function (data: any) {
         console.log(data);
         item.title = data.title;
         item.author = data.author;
