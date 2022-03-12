@@ -245,14 +245,13 @@ app.get('/api/books', async (req: any, res: any) => {
  * {json} req - provides the request body, search uses the isbn attribute 
  */
 app.post('/api/search', async (req: any, res: any) => {
-  console.log("Request Body: ", req.body);
-  
+  // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
     
-    if (isbnSearch.isIsbn10() || isbnSearch.isIsbn13()) {
-      let book = {
-        isbn: req.body.isbn,
+    if (isbnSearch) {
+      let item = {
+        isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
         call_no: ""
@@ -260,15 +259,16 @@ app.post('/api/search', async (req: any, res: any) => {
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [req.body.isbn], async function (data: any) {
-        if (data.title) {
-          book.title = data.title;
-          book.author = data.author;
-          book.call_no = data.congress;
+        item.title = data.title;
+        // Handle OCLC's grouping of authors, translators, etc.
+        item.author = data.author.split("|")[0];
+        item.call_no = data.congress;
 
-          addToDatabase(book);
-      
-          res.json({"status": "success", "book": book});
+        if (item.title != "") {
+          await addToDatabase(item);
+          res.json({"status": "success", "book": item});
         }
+        
         else {
           res.json({"status": "failure", "error": data})
         }
