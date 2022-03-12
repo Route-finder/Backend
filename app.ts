@@ -74,6 +74,24 @@ const pool = new Pool({
 
 /**
  * @function
+ * @param newItem: book
+ */
+async function addToDatabase(newItem: book) {
+  // Add book info (from OCLC response) to Database
+  const client = await pool.connect();
+  const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
+  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no];
+
+  try {
+    const res = await client.query(text, values)
+    console.log(res.rows[0])
+  } catch (err: any) {
+    console.log(err.stack)
+  }
+}
+
+/**
+ * @function
  * build_db - (re)build tables
  * 
  * @description
@@ -147,8 +165,8 @@ app.post('/add', async (req: any, res: any) => {
     console.log(isbnSearch);
     
     if (isbnSearch) {
-      let book = {
-        isbn: req.body.isbn,
+      let item = {
+        isbn: isbnSearch.isbn13,
         title: "",
         author: "",
         call_no: ""
@@ -156,10 +174,10 @@ app.post('/add', async (req: any, res: any) => {
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [req.body.isbn], async function (data: any) {
-        book.title = data.title;
-        book.author = data.author;
-        book.call_no = data.congress;
-        
+        item.title = data.title;
+        item.author = data.author;
+        item.call_no = data.congress;
+        /*
         if (book.title != "") {
           addToDatabase(book);
         }
@@ -167,9 +185,11 @@ app.post('/add', async (req: any, res: any) => {
         else {
           console.log("status: failure", "error:", data);
         }
+        */
+       localStorage.setItem("book", item.isbn);
 
         // Print a message
-        res.render('pages/add', {result: book});
+        res.render('pages/add', {result: item});
       });
     }
 
@@ -272,20 +292,6 @@ app.post('/api/search', async (req: any, res: any) => {
     res.json({"status": "failure", "error": "No Values Provided"});
   }
 });
-
-async function addToDatabase(newItem: book) {
-  // Add book info (from OCLC response) to Database
-  const client = await pool.connect();
-  const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
-  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no];
-
-  try {
-    const res = await client.query(text, values)
-    console.log(res.rows[0])
-  } catch (err: any) {
-    console.log(err.stack)
-  }
-}
 
 /**
  * @description
