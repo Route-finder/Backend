@@ -162,11 +162,11 @@ app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
-    console.log(`ISBN: ${isbnSearch.isbn13}`);
+    console.log(`ISBN: ${isbnSearch.asIsbn13()}`);
     
     if (isbnSearch) {
       let item = {
-        isbn: isbnSearch.isbn13,
+        isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
         call_no: ""
