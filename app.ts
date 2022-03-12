@@ -179,15 +179,14 @@ app.post('/add', async (req: any, res: any) => {
         item.title = data.title;
         item.author = data.author;
         item.call_no = data.congress;
-        /*
-        if (book.title != "") {
-          addToDatabase(book);
+
+        if (item.title != "") {
+          addToDatabase(item);
         }
 
         else {
           console.log("status: failure", "error:", data);
         }
-        */
 
         // Print a message
         res.render('pages/add', {result: item});

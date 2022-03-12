@@ -40,11 +40,15 @@
     <% if (result) { %>
       <div  class="mui-container - white" style="margin-top: 36px;">
         <p id="book1" style="font-size: 18px;">
+          <% if (result.title) { %>
+            <!-- Relies on API access -->
+            <%= result.title %> by <%= result.author %> added to the list!
+          <% } %>
 
-          <!-- Relies on API access -->
-          <!-- <%= result.title %> by <%= result.author %> -->
-          <%= result.title %> by <%= result.author %> added to the list!
-
+          <% if (! result.title) { %>
+            <!-- Catch errors -->
+            <%= result %>
+          <% } %>
         </p>
       </div>
     <% } %>
