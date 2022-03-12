@@ -172,7 +172,7 @@ app.post('/add', async (req: any, res: any) => {
         call_no: ""
       };
 
-      console.log(`Item: {item}`);
+      console.log(`Item: ${item}`);
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [req.body.isbn], async function (data: any) {
@@ -189,7 +189,6 @@ app.post('/add', async (req: any, res: any) => {
           console.log("status: failure", "error:", data);
         }
         */
-       localStorage.setItem("book", item.isbn);
 
         // Print a message
         res.render('pages/add', {result: item});
