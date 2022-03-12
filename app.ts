@@ -181,7 +181,7 @@ app.post('/add', async (req: any, res: any) => {
         item.call_no = data.congress;
 
         if (item.title != "") {
-          addToDatabase(item);
+          await addToDatabase(item);
         }
 
         else {
