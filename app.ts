@@ -162,7 +162,7 @@ app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
-    console.log(isbnSearch);
+    console.log(`ISBN: ${isbnSearch.isbn13}`);
     
     if (isbnSearch) {
       let item = {
@@ -172,7 +172,7 @@ app.post('/add', async (req: any, res: any) => {
         call_no: ""
       };
 
-      console.log(`Item: ${item}`);
+      console.log(`Item: ${item.isbn}`);
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [req.body.isbn], async function (data: any) {
