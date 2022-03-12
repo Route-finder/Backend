@@ -177,7 +177,8 @@ app.post('/add', async (req: any, res: any) => {
       classify.classify("isbn", [item.isbn], async function (data: any) {
         console.log(data);
         item.title = data.title;
-        item.author = data.author;
+        // Handle OCLC's grouping of authors, translators, etc.
+        item.author = data.author.split("|")[0];
         item.call_no = data.congress;
 
         if (item.title != "") {
