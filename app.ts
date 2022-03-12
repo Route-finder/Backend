@@ -144,6 +144,7 @@ app.post('/add', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
+    console.log(isbnSearch);
     
     if (isbnSearch.isIsbn10() || isbnSearch.isIsbn13()) {
       let book = {
@@ -155,22 +156,21 @@ app.post('/add', async (req: any, res: any) => {
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [req.body.isbn], async function (data: any) {
-        if (data.title) {
-          book.title = data.title;
-          book.author = data.author;
-          book.call_no = data.congress;
-
+        book.title = data.title;
+        book.author = data.author;
+        book.call_no = data.congress;
+        
+        if (book.title != "") {
           addToDatabase(book);
         }
 
         else {
           console.log("status: failure", "error:", data);
         }
-      });
 
-      // Placeholder: Print a message
-      const result = book;
-      res.render('pages/add', {result: result});
+        // Print a message
+        res.render('pages/add', {result: book});
+      });
     }
 
     else {
