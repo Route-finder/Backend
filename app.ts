@@ -146,7 +146,7 @@ app.post('/add', async (req: any, res: any) => {
     let isbnSearch = ISBN.parse(req.body.isbn);
     console.log(isbnSearch);
     
-    if (isbnSearch.isIsbn10() || isbnSearch.isIsbn13()) {
+    if (isbnSearch) {
       let book = {
         isbn: req.body.isbn,
         title: "",
