@@ -142,9 +142,9 @@ app.get('/route', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
 
-    const text = "SELECT * FROM booklist ORDER BY call_no WHERE username=$1";
+    const text = "SELECT * FROM booklist ORDER BY call_no WHERE username='Isaac'";
     const values = [req.cookies.name];
-    const result = await client.query(text, values);
+    const result = await client.query(text);
     const results = { 'results': (result) ? result.rows : null};
     
     res.render('pages/route', results );
