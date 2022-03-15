@@ -230,7 +230,7 @@ app.get('/api', (req: any, res: any) => {
  */
 app.get('/api/books', async (req: any, res: any) => {
   // API will use HTTP header parameters to specify users
-  console.log("Current User:", req.name);
+  console.log("Current User:", req);
   try {
     const client = await pool.connect();
 
