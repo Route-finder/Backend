@@ -43,7 +43,9 @@ const path = require('path');
 const classify = require('classify2_api');
 const lc = require('lc_call_number_compare');
 
-//here's a comment
+// Session Cookie Management
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 /**
  * Application Set-up and configuration
@@ -129,7 +131,10 @@ build_db();
 /**
  * Homepage GET route
  */
-app.get('/', (req: any, res: any) => res.render('pages/index'));
+app.get('/', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
+  res.render('pages/index');
+});
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
