@@ -144,7 +144,7 @@ app.get('/route', async (req: any, res: any) => {
 
     const text = "SELECT * FROM booklist WHERE username = $1";
     const values = [req.cookies.name];
-    const result = await client.query(text);
+    const result = await client.query(text, values);
     const results = { 'results': (result) ? result.rows : null};
     
     res.render('pages/route', results );
