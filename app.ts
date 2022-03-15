@@ -141,12 +141,12 @@ app.get('/route', async (req: any, res: any) => {
   console.log("Cookies:", req.cookies.name);
   try {
     const client = await pool.connect();
-                                                  // Use table name
+
     const text = "SELECT * FROM booklist ORDER BY call_no WHERE username = $1";
-    const values = req.cookies.name;
+    const values = [req.cookies.name];
     const result = await client.query(text, values);
     const results = { 'results': (result) ? result.rows : null};
-    console.log(results);
+    
     res.render('pages/route', results );
     client.release();
   } catch (err: any) {
