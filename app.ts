@@ -138,7 +138,7 @@ app.get('/', (req: any, res: any) => {
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
-  console.log("Cookies:", req.cookies.name);
+  console.log("Current User:", req.cookies.name);
   try {
     const client = await pool.connect();
 
@@ -229,10 +229,14 @@ app.get('/api', (req: any, res: any) => {
  * Provides list of books from database
  */
 app.get('/api/books', async (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
+  console.log("Current User:", req.cookies.name);
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT * FROM booklist'); // ORDER BY call_no
+
+    const text = "SELECT * FROM booklist WHERE username = $1";
+    const values = [req.cookies.name];
+    const result = await client.query(text, values);
+    console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
 
     // Sort the results according to LCC call number
