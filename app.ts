@@ -138,6 +138,7 @@ app.get('/', (req: any, res: any) => {
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   try {
     const client = await pool.connect();
                                                   // Use table name
@@ -156,6 +157,7 @@ app.get('/route', async (req: any, res: any) => {
  * Add page GET route
  */
 app.get('/add', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   let result = null;
   res.render('pages/add', {result: result});
 });
@@ -164,6 +166,7 @@ app.get('/add', (req: any, res: any) => {
  * Add page POST route
  */
 app.post('/add', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
@@ -215,6 +218,7 @@ app.post('/add', async (req: any, res: any) => {
  * Generic "hello world!" api route
  */
 app.get('/api', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   res.json({ "message": "Hello from the backend!" });
 });
 
@@ -223,6 +227,7 @@ app.get('/api', (req: any, res: any) => {
  * Provides list of books from database
  */
 app.get('/api/books', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT * FROM booklist'); // ORDER BY call_no
@@ -250,6 +255,7 @@ app.get('/api/books', async (req: any, res: any) => {
  * {json} req - provides the request body, search uses the isbn attribute 
  */
 app.post('/api/search', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
@@ -307,6 +313,7 @@ app.post('/api/search', async (req: any, res: any) => {
  * {json} req - provides the request body, requires req.body.isbn be populated
  */
 app.post('/api/remove', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   if (req.body.isbn) {
     // Submit a query to remove the book
     console.log(`Remove book with ISBN ${req.body.isbn} from the list`);
