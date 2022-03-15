@@ -7,7 +7,6 @@
 <head>
   <link rel="stylesheet" href="index.css">
   <%- include ("../partials/header.ejs") %>
-  <script src="./index.js"></script>
 </head>
 
 <body>
@@ -37,5 +36,14 @@
   </div>
 </div>
 
+<script>
+  let nameInput = document.getElementById("username");
+
+  function getName() {
+    console.log("getName Running")
+    let cookie = 'name=' + nameInput.value + '; SameSite=None; Secure';
+    document.cookie = cookie;
+  }
+</script>
 </body>
 </html>
