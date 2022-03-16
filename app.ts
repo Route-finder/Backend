@@ -237,7 +237,7 @@ app.get('/api/books', async (req: any, res: any) => {
     let text = "";
     let values: string[] = [];
 
-    if (req.query.name) {
+    if (req.query.name != "") {
       text = "SELECT * FROM booklist WHERE username = $1";
       values = [req.query.name];
     }
