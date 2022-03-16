@@ -181,7 +181,7 @@ app.post('/add', async (req: any, res: any) => {
         title: "",
         author: "",
         call_no: "",
-        username: req.body.name
+        username: req.cookies.name
       };
 
       console.log(`Item: ${item.isbn}`);
