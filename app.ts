@@ -237,8 +237,8 @@ app.get('/api/books', async (req: any, res: any) => {
     let text = "";
     let values: string[] = [];
 
-    text = "SELECT * FROM booklist WHERE username = $1";
-    let uName = req.query.name.length > 0 ? req.query.name : "NULL";
+    text = "SELECT * FROM booklist WHERE username $1";
+    let uName = req.query.name.length > 0 ? `=${req.query.name}` : "IS NULL";
     values.push(uName);
     console.log(`Name: ${uName}`);
 
