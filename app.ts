@@ -234,8 +234,18 @@ app.get('/api/books', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
 
-    const text = "SELECT * FROM booklist WHERE username = $1";
-    const values = [req.query.name];
+    let text = "";
+    let values: string[] = [];
+
+    if (req.query.name) {
+      text = "SELECT * FROM booklist WHERE username = $1";
+      values = [req.query.name];
+    }
+    // Fallback for no-user session, "login" should be enforced in future update
+    else {
+      text = "SELECT * FROM booklist WHERE username=NULL";
+    }
+
     const result = await client.query(text, values);
     console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
