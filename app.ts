@@ -82,8 +82,8 @@ const pool = new Pool({
 async function addToDatabase(newItem: book) {
   // Add book info (from OCLC response) to Database
   const client = await pool.connect();
-  const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
-  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no];
+  const text = "INSERT INTO booklist(isbn, author, title, call_no, username) VALUES($1, $2, $3, $4, $5) RETURNING *"
+  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no, newItem.username];
 
   try {
     const res = await client.query(text, values)
