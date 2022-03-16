@@ -237,17 +237,10 @@ app.get('/api/books', async (req: any, res: any) => {
     let text = "";
     let values: string[] = [];
 
-    if (req.query.name.length > 0) {
-      console.log("Name found");
-      text = "SELECT * FROM booklist WHERE username = $1";
-      values = [req.query.name];
-    }
-    // Fallback for no-user session, "login" should be enforced in future update
-    else {
-      console.log("Name NOT found");
-      text = "SELECT * FROM booklist WHERE username=$1";
-      values = ["NULL"]
-    }
+    text = "SELECT * FROM booklist WHERE username = $1";
+    let uName = req.query.name.length > 0 ? req.query.name : "NULL";
+    values.push(uName);
+    console.log(`Name: ${uName}`);
 
     const result = await client.query(text, values);
     console.log(result.rows);
