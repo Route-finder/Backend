@@ -245,20 +245,21 @@ app.get('/api/books', async (req: any, res: any) => {
     // Fallback for no-user session, "login" should be enforced in future update
     else {
       console.log("Name NOT found");
-      text = "SELECT * FROM booklist WHERE username=NULL";
+      text = "SELECT * FROM booklist WHERE username=$1";
+      values = ["NULL"]
     }
 
     const result = await client.query(text, values);
     console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
 
+    res.json(results);
+    client.release();
+    
     // Sort the results according to LCC call number
     // results = results.sort((a: any, b: any) => {
     //   return lc.lt(a.call_no, b.call_no);
     // });
-
-    res.json(results);
-    client.release();
   } catch (err: any) {
     console.error(err);
     res.json({"Error": err});
