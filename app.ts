@@ -17,7 +17,8 @@ type book = {
   isbn: string,
   title: string,
   author: string,
-  call_no: string
+  call_no: string,
+  username: string
 }
 
 // Express routing app
@@ -101,12 +102,13 @@ async function addToDatabase(newItem: book) {
  */
 async function build_db() {
   const client = await pool.connect();
-  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4))"
+  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4, $5))"
   const values = [
     "isbn VARCHAR(16) PRIMARY KEY",
     "author VARCHAR(50)",
     "title VARCHAR(150)",
-    "call_no VARCHAR(40)"
+    "call_no VARCHAR(40)",
+    "username VARCHAR(64)"
   ];
   
   try {
@@ -178,7 +180,8 @@ app.post('/add', async (req: any, res: any) => {
         isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
-        call_no: ""
+        call_no: "",
+        username: req.body.name
       };
 
       console.log(`Item: ${item.isbn}`);
@@ -270,9 +273,8 @@ app.get('/api/books', async (req: any, res: any) => {
  * {json} req - provides the request body, search uses the isbn attribute 
  */
 app.post('/api/search', async (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
   // Submit request to OCLC with ISBN
-  if (req.body.isbn) {
+  if (req.body.isbn && req.body.name) {
     let isbnSearch = ISBN.parse(req.body.isbn);
     
     if (isbnSearch) {
@@ -280,7 +282,8 @@ app.post('/api/search', async (req: any, res: any) => {
         isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
-        call_no: ""
+        call_no: "",
+        username: req.body.name
       };
     
       // Call classify method with request_type, identifier[], and callback()
