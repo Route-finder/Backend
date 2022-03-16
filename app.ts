@@ -234,13 +234,9 @@ app.get('/api/books', async (req: any, res: any) => {
   try {
     const client = await pool.connect();
 
-    let text = "";
-    let values: string[] = [];
-
-    text = "SELECT * FROM booklist WHERE username $1";
-    let uName = req.query.name.length > 0 ? `=${req.query.name}` : "IS NULL";
-    values.push(uName);
-    console.log(`Name: ${uName}`);
+    let text = "SELECT * FROM booklist WHERE username";
+    text = text + (req.query.name.length > 0 ? " = $1" : " IS NULL");
+    let values: string[] = [req.query.name];
 
     const result = await client.query(text, values);
     console.log(result.rows);
