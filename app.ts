@@ -230,14 +230,14 @@ app.get('/api', (req: any, res: any) => {
  */
 app.get('/api/books', async (req: any, res: any) => {
   // API will use HTTP header parameters to specify users
-  console.log("Current User:", req.query.name);
+  console.log("Current User:", req.query.name.length);
   try {
     const client = await pool.connect();
 
     let text = "";
     let values: string[] = [];
 
-    if (req.query.name != "") {
+    if (req.query.name.length > 0) {
       text = "SELECT * FROM booklist WHERE username = $1";
       values = [req.query.name];
     }
