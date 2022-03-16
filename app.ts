@@ -17,7 +17,8 @@ type book = {
   isbn: string,
   title: string,
   author: string,
-  call_no: string
+  call_no: string,
+  username: string
 }
 
 // Express routing app
@@ -43,7 +44,9 @@ const path = require('path');
 const classify = require('classify2_api');
 const lc = require('lc_call_number_compare');
 
-//here's a comment
+// Session Cookie Management
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 /**
  * Application Set-up and configuration
@@ -79,8 +82,8 @@ const pool = new Pool({
 async function addToDatabase(newItem: book) {
   // Add book info (from OCLC response) to Database
   const client = await pool.connect();
-  const text = "INSERT INTO booklist(isbn, author, title, call_no) VALUES($1, $2, $3, $4) RETURNING *"
-  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no];
+  const text = "INSERT INTO booklist(isbn, author, title, call_no, username) VALUES($1, $2, $3, $4, $5) RETURNING *"
+  const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no, newItem.username];
 
   try {
     const res = await client.query(text, values)
@@ -99,12 +102,13 @@ async function addToDatabase(newItem: book) {
  */
 async function build_db() {
   const client = await pool.connect();
-  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4))"
+  const text = "CREATE TABLE IF NOT EXISTS booklist (VALUES($1, $2, $3, $4, $5))"
   const values = [
     "isbn VARCHAR(16) PRIMARY KEY",
     "author VARCHAR(50)",
     "title VARCHAR(150)",
-    "call_no VARCHAR(40)"
+    "call_no VARCHAR(40)",
+    "username VARCHAR(64)"
   ];
   
   try {
@@ -129,16 +133,22 @@ build_db();
 /**
  * Homepage GET route
  */
-app.get('/', (req: any, res: any) => res.render('pages/index'));
+app.get('/', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
+  res.render('pages/index');
+});
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
+  console.log("Current User:", req.cookies.name);
   try {
     const client = await pool.connect();
-                                                  // Use table name
-    const result = await client.query('SELECT * FROM booklist ORDER BY call_no');
+
+    const text = "SELECT * FROM booklist WHERE username = $1";
+    const values = [req.cookies.name];
+    const result = await client.query(text, values);
     const results = { 'results': (result) ? result.rows : null};
-    console.log(results);
+    
     res.render('pages/route', results );
     client.release();
   } catch (err: any) {
@@ -151,6 +161,7 @@ app.get('/route', async (req: any, res: any) => {
  * Add page GET route
  */
 app.get('/add', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   let result = null;
   res.render('pages/add', {result: result});
 });
@@ -159,6 +170,7 @@ app.get('/add', (req: any, res: any) => {
  * Add page POST route
  */
 app.post('/add', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
@@ -168,7 +180,8 @@ app.post('/add', async (req: any, res: any) => {
         isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
-        call_no: ""
+        call_no: "",
+        username: req.cookies.name
       };
 
       console.log(`Item: ${item.isbn}`);
@@ -210,6 +223,7 @@ app.post('/add', async (req: any, res: any) => {
  * Generic "hello world!" api route
  */
 app.get('/api', (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   res.json({ "message": "Hello from the backend!" });
 });
 
@@ -218,18 +232,32 @@ app.get('/api', (req: any, res: any) => {
  * Provides list of books from database
  */
 app.get('/api/books', async (req: any, res: any) => {
+  // API will use HTTP header parameters to specify users
+  console.log("Current User:", req.query.name);
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT * FROM booklist'); // ORDER BY call_no
+
+    let text = "SELECT * FROM booklist WHERE username = $1";
+    let values: string[] = [req.query.name];
+
+    const result = await client.query(text, values);
+    console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
 
+    if (req.query.name.length > 0) {
+      res.json(results);
+    }
+    // Enforce username requirement
+    else {
+      res.json({'error': 'No Username Provided'});
+    }
+
+    client.release();
+    
     // Sort the results according to LCC call number
     // results = results.sort((a: any, b: any) => {
     //   return lc.lt(a.call_no, b.call_no);
     // });
-
-    res.json(results);
-    client.release();
   } catch (err: any) {
     console.error(err);
     res.json({"Error": err});
@@ -246,7 +274,7 @@ app.get('/api/books', async (req: any, res: any) => {
  */
 app.post('/api/search', async (req: any, res: any) => {
   // Submit request to OCLC with ISBN
-  if (req.body.isbn) {
+  if (req.body.isbn && req.body.name) {
     let isbnSearch = ISBN.parse(req.body.isbn);
     
     if (isbnSearch) {
@@ -254,7 +282,8 @@ app.post('/api/search', async (req: any, res: any) => {
         isbn: isbnSearch.asIsbn13(),
         title: "",
         author: "",
-        call_no: ""
+        call_no: "",
+        username: req.body.name
       };
     
       // Call classify method with request_type, identifier[], and callback()
@@ -302,6 +331,7 @@ app.post('/api/search', async (req: any, res: any) => {
  * {json} req - provides the request body, requires req.body.isbn be populated
  */
 app.post('/api/remove', async (req: any, res: any) => {
+  console.log("Cookies:", req.cookies);
   if (req.body.isbn) {
     // Submit a query to remove the book
     console.log(`Remove book with ISBN ${req.body.isbn} from the list`);

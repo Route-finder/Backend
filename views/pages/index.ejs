@@ -7,7 +7,6 @@
 <head>
   <link rel="stylesheet" href="index.css">
   <%- include ("../partials/header.ejs") %>
-
 </head>
 
 <body>
@@ -22,6 +21,13 @@
         or in the navigation bar above to either add books to your list, or 
         view the currently selected items and their route.
       </p>
+      <p>
+        To save your searches, please enter your name here:
+      </p>
+      <input type="text" id="username">
+      <button onclick="getName()">
+        Save
+      </button>
     </div>
     <div class="card-action">
       <a href="/route">View Books</a>
@@ -30,5 +36,14 @@
   </div>
 </div>
 
+<script>
+  let nameInput = document.getElementById("username");
+
+  function getName() {
+    console.log("getName Running")
+    let cookie = 'name=' + nameInput.value + '; SameSite=None; Secure';
+    document.cookie = cookie;
+  }
+</script>
 </body>
 </html>
