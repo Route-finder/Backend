@@ -230,19 +230,25 @@ app.get('/api', (req: any, res: any) => {
  */
 app.get('/api/books', async (req: any, res: any) => {
   // API will use HTTP header parameters to specify users
-  console.log("Current User:", req.query.name.length);
+  console.log("Current User:", req.query.name);
   try {
     const client = await pool.connect();
 
-    let text = "SELECT * FROM booklist WHERE username";
-    text = text + (req.query.name.length > 0 ? " = $1" : " IS NULL");
+    let text = "SELECT * FROM booklist WHERE username = $1";
     let values: string[] = [req.query.name];
 
     const result = await client.query(text, values);
     console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
 
-    res.json(results);
+    if (req.query.name.length > 0) {
+      res.json(results);
+    }
+    // Enforce username requirement
+    else {
+      res.json({'error': 'No Username Provided'});
+    }
+
     client.release();
     
     // Sort the results according to LCC call number
