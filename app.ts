@@ -313,6 +313,16 @@ app.post('/api/search', async (req: any, res: any) => {
   else if (req.body.title || req.body.author) {
     let values = [req.body.title, req.body.author];
 
+    classify.classify("title-author", values, async function (data: any) {
+      if (data) {
+        res.json({"status": "success", "results": data});
+      }
+
+      else {
+        res.json({"status": "failure", "error": data})
+      }
+    })
+
     console.log(values);
   }
 
