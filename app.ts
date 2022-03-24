@@ -309,7 +309,7 @@ app.post('/api/search', async (req: any, res: any) => {
     }
   }
 
-  // TODO: Account for title and author search
+  // Account for title and author search
   else if (req.body.title || req.body.author) {
     let values = [req.body.title, req.body.author];
 
@@ -324,6 +324,39 @@ app.post('/api/search', async (req: any, res: any) => {
     })
 
     console.log(values);
+  }
+
+  else if (req.body.wi && req.body.name) {
+    try {
+      let item = {
+        isbn: "",
+        title: "",
+        author: "",
+        call_no: "",
+        username: req.body.name
+      };
+    
+      // Call classify method with request_type, identifier[], and callback()
+      classify.classify("wi", [req.body.wi], async function (data: any) {
+        item.title = data.title;
+        // Handle OCLC's grouping of authors, translators, etc.
+        item.author = data.author.split("|")[0];
+        item.call_no = data.congress;
+
+        if (item.title != "") {
+          await addToDatabase(item);
+          res.json({"status": "success", "book": item});
+        }
+        
+        else {
+          res.json({"status": "failure", "error": data})
+        }
+      });
+    }
+
+    catch (err: any) {
+      res.json({"status": "failure", "error": err});
+    }
   }
 
   // Account for no information entered
