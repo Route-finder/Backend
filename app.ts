@@ -374,23 +374,20 @@ app.post('/api/search', async (req: any, res: any) => {
  * {json} req - provides the request body, requires req.body.isbn be populated
  */
 app.post('/api/remove', async (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
-  if (req.body.isbn) {
-    // Submit a query to remove the book
-    console.log(`Remove book with ISBN ${req.body.isbn} from the list`);
-
-    // Add book info (from OCLC response) to Database
+  // Submit a query to remove the book
+  if (req.body.isbn && req.body.name) {
     const client = await pool.connect();
-    const text = "DELETE FROM booklist WHERE isbn=VALUES($1)"
-    const values = [req.body.isbn];
+    const text = "DELETE FROM booklist WHERE isbn=VALUES($1) AND username=VALUES($2)"
+    const values = [req.body.isbn, req.body.name];
   
     try {
       const res = await client.query(text, values)
+      res.json({"Status": "Success"});
     } catch (err: any) {
       console.log(err.stack)
+      res.json({"Failure": err})
     }
 
-    res.json({"Status": "Success"});
   }
 });
 
