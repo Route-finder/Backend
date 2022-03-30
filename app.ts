@@ -52,9 +52,6 @@ app.use(cookieParser());
  * Application Set-up and configuration
  */
 
-// Hosted port
-const PORT = process.env.PORT || 3100;
-
 // Response parsers for json, xwww-form-urlencoded, multipart/form-data
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: false }));
@@ -391,18 +388,4 @@ app.post('/api/remove', async (req: any, res: any) => {
   }
 });
 
-/**
- * @function
- * 
- * @description
- * Listen on PORT for requests, start the server
- */ 
-app.listen(PORT, () => {
-  console.log(`app listening on port ${PORT}`);
-});
-
-/**
- * @description
- * Define a 404 Route
- */
-app.use((req: any, res: any) => res.status(404).render('pages/404'));
+module.exports = app;
