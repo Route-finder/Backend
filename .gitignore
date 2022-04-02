@@ -7,3 +7,4 @@ package.json
 *.swp
 app.js
 src/path.js
+.nyc_output
