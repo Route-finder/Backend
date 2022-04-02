@@ -10,7 +10,7 @@
     "start": "node server.js",
     "postinstall": "tsc",
     "build": "tsc",
-    "test": "mocha --exit"
+    "test": "nyc mocha --exit"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
