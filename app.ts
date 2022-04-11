@@ -365,17 +365,18 @@ app.post('/api/search', async (req: any, res: any) => {
 
 /**
  * @description
- * Provides a route via which to remove an item from the database
+ * Provides a route via which to remove all items associated with a given user
+ * from the database
  * 
  * @param
  * {json} req - provides the request body, requires req.body.isbn be populated
  */
 app.post('/api/remove', async (req: any, res: any) => {
   // Submit a query to remove the book
-  if (req.body.isbn && req.body.name) {
+  if (req.body.name) {
     const client = await pool.connect();
-    const text = "DELETE FROM booklist WHERE isbn=VALUES($1) AND username=VALUES($2)"
-    const values = [req.body.isbn, req.body.name];
+    const text = "DELETE FROM booklist WHERE username=VALUES($1)"
+    const values = [req.body.name];
   
     try {
       const res = await client.query(text, values)
