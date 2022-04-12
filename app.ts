@@ -83,10 +83,9 @@ async function addToDatabase(newItem: book) {
   const values = [newItem.isbn, newItem.author, newItem.title, newItem.call_no, newItem.username];
 
   try {
-    const res = await client.query(text, values)
-    console.log(res.rows[0])
+    const res = await client.query(text, values);
   } catch (err: any) {
-    console.log(err.stack)
+    const res = err.stack;
   }
 }
 
@@ -109,10 +108,9 @@ async function build_db() {
   ];
   
   try {
-    const res = await client.query(text, values)
-    console.log(res.rows[0])
+    const res = await client.query(text, values);
   } catch (err: any) {
-    console.log(err.stack)
+    const res = err.stack;
   }
 }
 
@@ -131,13 +129,11 @@ build_db();
  * Homepage GET route
  */
 app.get('/', (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
   res.render('pages/index');
 });
 
 // Route Information
 app.get('/route', async (req: any, res: any) => {
-  console.log("Current User:", req.cookies.name);
   try {
     const client = await pool.connect();
 
@@ -149,7 +145,6 @@ app.get('/route', async (req: any, res: any) => {
     res.render('pages/route', results );
     client.release();
   } catch (err: any) {
-    console.error(err);
     res.send("Error " + err);
   }
 });
@@ -158,7 +153,6 @@ app.get('/route', async (req: any, res: any) => {
  * Add page GET route
  */
 app.get('/add', (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
   let result = null;
   res.render('pages/add', {result: result});
 });
@@ -167,7 +161,6 @@ app.get('/add', (req: any, res: any) => {
  * Add page POST route
  */
 app.post('/add', async (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
   // Submit request to OCLC with ISBN
   if (req.body.isbn) {
     let isbnSearch = ISBN.parse(req.body.isbn);
@@ -180,12 +173,9 @@ app.post('/add', async (req: any, res: any) => {
         call_no: "",
         username: req.cookies.name
       };
-
-      console.log(`Item: ${item.isbn}`);
     
       // Call classify method with request_type, identifier[], and callback()
       classify.classify("isbn", [item.isbn], async function (data: any) {
-        console.log(data);
         item.title = data.title;
         // Handle OCLC's grouping of authors, translators, etc.
         item.author = data.author.split("|")[0];
@@ -220,7 +210,6 @@ app.post('/add', async (req: any, res: any) => {
  * Generic "hello world!" api route
  */
 app.get('/api', (req: any, res: any) => {
-  console.log("Cookies:", req.cookies);
   res.json({ "message": "Hello from the backend!" });
 });
 
@@ -230,7 +219,6 @@ app.get('/api', (req: any, res: any) => {
  */
 app.get('/api/books', async (req: any, res: any) => {
   // API will use HTTP header parameters to specify users
-  console.log("Current User:", req.query.name);
   try {
     const client = await pool.connect();
 
@@ -238,7 +226,6 @@ app.get('/api/books', async (req: any, res: any) => {
     let values: string[] = [req.query.name];
 
     const result = await client.query(text, values);
-    console.log(result.rows);
     const results = { 'results': (result) ? result.rows : null};
 
     if (req.query.name.length > 0) {
@@ -256,7 +243,6 @@ app.get('/api/books', async (req: any, res: any) => {
     //   return lc.lt(a.call_no, b.call_no);
     // });
   } catch (err: any) {
-    console.error(err);
     res.json({"Error": err});
   }
 });
@@ -319,8 +305,6 @@ app.post('/api/search', async (req: any, res: any) => {
         res.json({"status": "failure", "error": data})
       }
     })
-
-    console.log(values);
   }
 
   else if (req.body.wi && req.body.name) {
@@ -358,31 +342,36 @@ app.post('/api/search', async (req: any, res: any) => {
 
   // Account for no information entered
   else {
-    console.log("Nothing entered");
     res.json({"status": "failure", "error": "No Values Provided"});
   }
 });
 
 /**
  * @description
- * Provides a route via which to remove an item from the database
+ * Provides a route via which to remove all items associated with a given user
+ * from the database
  * 
  * @param
  * {json} req - provides the request body, requires req.body.isbn be populated
  */
 app.post('/api/remove', async (req: any, res: any) => {
   // Submit a query to remove the book
-  if (req.body.isbn && req.body.name) {
-    const client = await pool.connect();
-    const text = "DELETE FROM booklist WHERE isbn=VALUES($1) AND username=VALUES($2)"
-    const values = [req.body.isbn, req.body.name];
-  
+  if (req.body.name) {
     try {
+      // Connect to the DB
+      const client = await pool.connect();
+
+      // Define Parameters
+      const text = "DELETE FROM booklist WHERE username=VALUES($1)"
+      const values = [req.body.name];
+
+      // Submit query
       const res = await client.query(text, values)
+
+      // Return JSON if success
       res.json({"Status": "Success"});
     } catch (err: any) {
-      console.log(err.stack)
-      res.json({"Failure": err})
+      res.json({"Status": "Failure", "Error": err})
     }
 
   }

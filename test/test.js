@@ -19,17 +19,16 @@ describe("Unit testing the Backend API", function () {
       .expect('Content-Type', /json/)
       .expect(200, done);
   });
-/*
-  it("Search route returns JSON", function (done) {
+
+  it("Remove route returns JSON", function (done) {
     this.timeout(3500);
     request(app)
-      .post('/api/search')
-      .send({isbn: '9780380807345', name: 'Isaac'})
+      .post('/api/remove')
+      .send({name: 'Isaac'})
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, done);
   });
-  */
 });
 
 describe("Unit testing the Express.js Routes", function () {
