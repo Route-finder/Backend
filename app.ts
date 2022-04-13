@@ -362,8 +362,8 @@ app.post('/api/remove', async (req: any, res: any) => {
       const client = await pool.connect();
 
       // Define Parameters
-      const text = "DELETE FROM booklist WHERE username=VALUES($1)";
-      const values = [req.body.name];
+      const text = "DELETE FROM booklist WHERE username = $1";
+      const values: string[] = [req.body.name];
 
       console.log(values);
 
