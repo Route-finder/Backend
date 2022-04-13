@@ -365,12 +365,8 @@ app.post('/api/remove', async (req: any, res: any) => {
       const text = "DELETE FROM booklist WHERE username = $1";
       const values: string[] = [req.body.name];
 
-      console.log(values);
-
       // Submit query
       const results = await client.query(text, values);
-
-      console.log(results);
 
       // Return JSON if success
       res.json({"Status": "Success"});
