@@ -362,11 +362,13 @@ app.post('/api/remove', async (req: any, res: any) => {
       const client = await pool.connect();
 
       // Define Parameters
-      const text = "DELETE FROM booklist WHERE username=VALUES($1)"
+      const text = "DELETE FROM booklist WHERE username=VALUES($1)";
       const values = [req.body.name];
 
+      console.log(values);
+
       // Submit query
-      const res = await client.query(text, values)
+      const results = await client.query(text, values);
 
       // Return JSON if success
       res.json({"Status": "Success"});
