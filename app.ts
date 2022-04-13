@@ -370,6 +370,8 @@ app.post('/api/remove', async (req: any, res: any) => {
       // Submit query
       const results = await client.query(text, values);
 
+      console.log(results);
+
       // Return JSON if success
       res.json({"Status": "Success"});
     } catch (err: any) {
